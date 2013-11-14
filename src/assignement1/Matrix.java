@@ -334,5 +334,169 @@ public class Matrix {
 		return stack;
 	}
 	
+		//return a matrix after applying smoothing (gaussian filter) on GREYSCALE images
+	public Matrix smoothing(){
+	
+		int[][] Mfin = new int[rows][columns];
+		int mask,mask_factor;
+		int[] mask_weight= {1,	2,	1,
+							2,	4,	2,
+							1,	2,	1};
+	
+		mask_factor=(mask_weight[0]+mask_weight[1]+mask_weight[2]+mask_weight[3]+mask_weight[4]+mask_weight[5]+mask_weight[6]+mask_weight[7]+mask_weight[8]);
+		
+		for(int i = 1; i < rows-1; ++i)
+		{
+		    for(int j = 1; j < columns-1; ++j)
+		    {
+		    		mask = a[i-1][j-1]*mask_weight[0];
+		    		mask += a[i-1][j]*mask_weight[1];
+		    		mask += a[i-1][j+1]*mask_weight[2];
+		    		mask += a[i][j-1]*mask_weight[3];
+		    		mask += a[i][j]*mask_weight[4];
+		    		mask += a[i][j+1]*mask_weight[5];
+		    		mask += a[i+1][j-1]*mask_weight[6];
+		    		mask += a[i+1][j]*mask_weight[7];
+		    		mask += a[i+1][j+1]*mask_weight[8];
+		    		
+		    		Mfin[i][j] = mask=mask/mask_factor;
+		    }
+		}
+		
+		for(int j = 1; j < columns-1; ++j)
+		{
+			Mfin[0][j] = Mfin[1][j] ;
+			Mfin[rows-1][j] = Mfin[rows-2][j];
+
+		}
+		
+		for(int i = 0; i < rows; ++i)
+		{
+			Mfin[i][0] = Mfin[i][1] ;
+			Mfin[i][columns-1] = Mfin[i][columns-2];
+
+		}
+		
+		Matrix Mresult = new Matrix(Mfin, rows, columns);
+	
+		return Mresult;				
+	}
+
+	//return a matrix after applying filling on BINARY images
+	public Matrix filling(){
+		
+		int[][] Mfin = new int[rows][columns];
+		for(int i = 1; i < rows-1; ++i)
+		{
+		    for(int j = 1; j < columns-1; ++j)
+		    {
+		    		Mfin[i][j] = a[i][j]+a[i-1][j-1]*a[i+1][j+1]+a[i-1][j]*a[i+1][j]+a[i-1][j+1]*a[i+1][j-1]+a[i][j-1]*a[i][j+1];
+		    		if(Mfin[i][j]>0)
+		    			Mfin[i][j]=1;
+		    }
+		}
+
+		for(int j = 1; j < columns-1; ++j)
+		{
+			Mfin[0][j] = Mfin[1][j] ;
+			Mfin[rows-1][j] = Mfin[rows-2][j];
+
+		}
+		
+		for(int i = 0; i < rows; ++i)
+		{
+			Mfin[i][0] = Mfin[i][1] ;
+			Mfin[i][columns-1] = Mfin[i][columns-2];
+
+		}		
+		
+		Matrix Mresult = new Matrix(Mfin, rows, columns);
+		return Mresult;
+	}
+
+	//return a matrix after applying thinning on BINARY images	
+	public Matrix thinning(){
+		
+		int[][] Mfin = new int[rows][columns];
+		for(int i = 1; i < rows-1; ++i)
+		{
+		    for(int j = 1; j < columns-1; ++j)
+		    {
+		    		Mfin[i][j] = a[i][j]*(a[i-1][j-1]*a[i-1][j]*a[i-1][j-1]+a[i-1][j]*a[i-1][j+1]*a[i][j+1]+a[i][j+1]*a[i+1][j]*a[i+1][j+1]+a[i][j-1]*a[i+1][j-1]*a[i+1][j]);		
+		    		if(Mfin[i][j]>0)
+		    			Mfin[i][j]=1;
+		    }
+		}
+
+		for(int j = 1; j < columns-1; ++j)
+		{
+			Mfin[0][j] = Mfin[1][j] ;
+			Mfin[rows-1][j] = Mfin[rows-2][j];
+
+		}
+		
+		for(int i = 0; i < rows; ++i)
+		{
+			Mfin[i][0] = Mfin[i][1] ;
+			Mfin[i][columns-1] = Mfin[i][columns-2];
+
+		}		
+		
+		Matrix Mresult = new Matrix(Mfin, rows, columns);
+		return Mresult;
+	}
+	
+		//Calculate the GradientVector on BINARY images	
+	public void gradientVector(){
+		
+		double gx=0;
+		double gy=0;
+		double g=0;
+		double angle=0;
+		int angle_index=0;
+		
+		this.gradientVector = new float[5][5][16];
+						
+				for(int i = 1; i < rows-1; ++i)
+				{
+				    for(int j = 1; j < columns-1; ++j)
+				    {
+				    	gx=(a[i+1][j+1]+2*a[i][j+1]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i][j-1]+a[i-1][j-1]);
+				    	gy=(a[i-1][j-1]+2*a[i-1][j]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i+1][j]+a[i+1][j+1]);
+				    	angle=Math.atan2(gy, gx); //degrees from -pi to pi
+				    	
+				    	angle_index=(int) (angle/(2*Math.PI/16)); //int from -8 to 8
+				    	angle_index+=8;//int from 0 to 16
+				    	
+				    	if(angle_index==16)
+				    		angle_index=15;//int from 0 to 15
+				    	
+				    	gx=Math.pow(gx, 2);
+				    	gy=Math.pow(gy, 2);
+				    	g=Math.sqrt(gx+gy);
+				    	
+
+						gradientVector[(int)(i/(rows/5))][(int)(j/(columns/5))][angle_index]+=g;
+
+				    }
+				}	    	
+				
+				
+				
+				String stack = "";
+				for(int i = 0; i < 5; ++i)
+				{
+				    for(int j = 0; j < 5; ++j)
+				    {
+				    	for(int k=0;k<16;k++)
+				    	{
+				    		stack = stack + " " + this.gradientVector[i][j][k];
+				    	}
+					    stack = stack + "\t";
+				    }
+				    stack = stack + "\n";
+				}
+				System.out.println(stack);
+	}
 
 }
