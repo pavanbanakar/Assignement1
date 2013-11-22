@@ -31,6 +31,62 @@ public class Matrix {
 		this.columns = columns;
 	}
 	
+	
+	//initialize a matrix from an image file
+	public Matrix(Image image) throws Exception{
+		/*Image image = Toolkit.getDefaultToolkit().createImage(file);*/ //Use that line to initalize an object Image
+		BufferedImage i = toBufferedImage(image);
+		rows = i.getWidth();
+		columns = i.getHeight();
+		int nbElements = rows*columns;
+		int s = 0;
+		a = new int[rows][columns];
+		for (int j = 0; j < rows; j++) {
+		    for (int k = 0; k < columns; k++) {
+		    	int rgb = i.getRGB(j, k);
+		    	int red =   (rgb >> 16) & 0xFF;
+		    	int green = (rgb >>  8) & 0xFF;
+		    	int blue =  (rgb      ) & 0xFF;
+		        a[j][k] = (int) (0.2126*red + 0.7152*green + 0.0722*blue);
+		        s += a[j][k];
+		    }
+		}
+		this.toBinaryImage(s/nbElements);
+	}
+	
+	
+	private static BufferedImage toBufferedImage(Image image) {
+	    if (image instanceof BufferedImage) {
+	        // Return image unchanged if it is already a BufferedImage.
+	        return (BufferedImage) image;
+	    }
+
+	    // Ensure image is loaded.
+	    image = new ImageIcon(image).getImage();
+
+	    BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null),  BufferedImage.TYPE_INT_ARGB);
+	    Graphics g = bufferedImage.createGraphics();
+	    g.drawImage(image, 0, 0, null);
+	    g.dispose();
+
+	    return bufferedImage;
+	}
+	
+	
+	private void toBinaryImage(int threshold){
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				if (a[i][j]>threshold){
+					a[i][j]=1;
+				}
+				else{
+					a[i][j]=0;
+				}
+			}
+		}
+	}
+	
+	
 	//initialize a matrix from a file
 	public Matrix(String file) throws Exception{
 		Scanner input;
