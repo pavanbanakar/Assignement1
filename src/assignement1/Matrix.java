@@ -36,14 +36,14 @@ public class Matrix {
 	public Matrix(Image image) throws Exception{
 		/*Image image = Toolkit.getDefaultToolkit().createImage(file);*/ //Use that line to initalize an object Image
 		BufferedImage i = toBufferedImage(image);
-		rows = i.getWidth();
-		columns = i.getHeight();
+		columns = i.getWidth();
+		rows = i.getHeight();
 		int nbElements = rows*columns;
 		int s = 0;
 		a = new int[rows][columns];
 		for (int j = 0; j < rows; j++) {
 		    for (int k = 0; k < columns; k++) {
-		    	int rgb = i.getRGB(j, k);
+		    	int rgb = i.getRGB(k, j);
 		    	int red =   (rgb >> 16) & 0xFF;
 		    	int green = (rgb >>  8) & 0xFF;
 		    	int blue =  (rgb      ) & 0xFF;
