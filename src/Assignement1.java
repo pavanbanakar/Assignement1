@@ -11,7 +11,7 @@ public class Assignement1 {
 
 	public static void main(String[] args) throws Exception{
 		
-		//Original patterns
+		/*//Original patterns
 		Matrix M1 = new Matrix("..\\Pattern1.txt");//loading of the first pattern from its txt file
 		Matrix M2 = new Matrix("..\\Pattern2.txt");//loading of the second pattern from its txt file
 		Matrix M3 = new Matrix("..\\Pattern3.txt");//loading of the third pattern from its txt file
@@ -72,7 +72,11 @@ public class Assignement1 {
 		System.out.println(M2nsc);
 		
 		System.out.println("Pattern 3 (normalization, slant correction and contour) :");//Display of M3nsc
-		System.out.println(M3nsc);
+		System.out.println(M3nsc);*/
+		String file = "F:\\Concordia\\COMP473 (Patern recognition)\\Lab\\Project\\project\\jpeg.jpg";//if you have an error like width =-1 your file was not found
+		Image image = Toolkit.getDefaultToolkit().createImage(file);
+		Matrix m = new Matrix(image);
+		System.out.println(m);
 	}
 	
 }
