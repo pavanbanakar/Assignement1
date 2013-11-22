@@ -502,17 +502,148 @@ public class Matrix {
 		return Mresult;
 	}
 	
-		//Calculate the GradientVector on BINARY images	
-	public void gradientVector(){
+	public void Skeletonize()
+    {
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                if (i == 0 || i == (rows) - 1 || j == 0 || j == (columns) - 1 ||j==(columns)-2)
+                {
+                    a[i][j] = 1; //Ignoring Border Pixels .Assumption that border pixels doesn't have image 
+                }
+                else
+                {
+                    
+                    int a = 0;
+                    {
+                        if ( j != columns - 1)
+                        {
+                            a = GetNumberOfZeroTo1Transactions(a, i, j);
+                        }
+
+                    }
+                    int b = 0;
+                    {
+                        if ( j != columns - 1)
+                        {
+                            b = GetNumberOfSurroundingBlackPixels(a, i, j);
+                        }
+                    }
+
+                    if (a[i][j] == 0 && 2 <= b && b <= 6 && a == 1
+                        && (a[i - 1][j] * a[i][j + 1] * a[i + 1][j] == 0)
+                        && (a[i][j + 1] * a[i + 1][j] * a[i][j - 1] == 0))
+                    {
+                        a[i][j] = 1;
+                    }
+
+                }
+            }
+        }
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                if (i == 0 || i == (rows) - 1 || j == 0 || j == (columns) - 1 || j == (columns) - 2)
+                {
+                    a[i][j] = 1; //Ignoring Border Pixels .Assumption that border pixels doesnt have image 
+                }
+                else
+                {
+
+                    int a = 0;
+                    {
+                        if ( j != columns - 1)
+                        {
+                            a = GetNumberOfZeroTo1Transactions(a, i, j);
+                        }
+
+                    }
+                    int b = 0;
+                    {
+                        if ( j != columns - 1)
+                        {
+                            b = GetNumberOfSurroundingBlackPixels(a, i, j);
+                        }
+                    }
+
+                    if (a[i][j] == 0 && 2 <= b && b <= 6 && a == 1
+                            && (a[i - 1][j] * a[i][j + 1] * a[i + 1][j] == 0)
+                            && (a[i][j + 1] * a[i + 1][j] * a[i][j - 1] == 0))
+                        {
+                            a[i][j] = 1;
+                        }
+
+                }
+            }
+        }
+ 
+    }
+
+    private int GetNumberOfZeroTo1Transactions(int[][] a, int i, int j)
+    {
+        int countOFZeroToOneTransactions = 0;
+
+        if (a[i - 1][j] == 0 && a[i - 1][j + 1] == 1)
+        {
+            countOFZeroToOneTransactions++;
+
+        }
+        if (a[i - 1][j + 1] == 0 && a[i][j + 1] == 1)
+        {
+            countOFZeroToOneTransactions++;
+        }
+        if (a[i][j + 1] == 0 && a[i + 1][j + 1] == 1)
+        {
+            countOFZeroToOneTransactions++;
+        }
+        if (a[i + 1][j + 1] == 0 && a[i + 1][j] == 1)
+        {
+            countOFZeroToOneTransactions++;
+        }
+        if (a[i + 1][j] == 0 && a[i + 1][j - 1] == 1)
+        {
+            countOFZeroToOneTransactions++;
+        }
+        if (a[i + 1][j - 1] == 0 && a[i][j - 1] == 1)
+        {
+            countOFZeroToOneTransactions++;
+        }
+        if (a[i][j - 1] == 0 && a[i - 1][j - 1] == 1)
+        {
+            countOFZeroToOneTransactions++;
+        }
+        if (a[i - 1][j - 1] == 0 && a[i - 1][j] == 1)
+        {
+            countOFZeroToOneTransactions++;
+        }
+        return countOFZeroToOneTransactions;
+    }
+
+    private static int GetNumberOfSurroundingBlackPixels(int[][] a, int i, int j)
+    {
+        return (a[i - 1][j] + a[i - 1][j + 1] + a[i][j + 1] + a[i + 1][j + 1] + a[i + 1][j] +
+                a[i + 1][j - 1] + a[i][j - 1] + a[i - 1][j - 1]);
+      
+    }	
+	
+	//Calculate the GradientVector on BINARY images	
+	public float[] gradientVector(){
 		
 		double gx=0;
 		double gy=0;
 		double g=0;
 		double angle=0;
 		int angle_index=0;
+		float[][][] gradientVector;
+		float []feature_vector;
 		
-		this.gradientVector = new float[5][5][16];
-						
+		
+		gradientVector = new float[5][5][16]; //the image is divided 25 parts (5 columns and 5 rows). Each part has 16 features.
+		feature_vector = new float[5*5*16];
+		
 				for(int i = 1; i < rows-1; ++i)
 				{
 				    for(int j = 1; j < columns-1; ++j)
@@ -520,7 +651,7 @@ public class Matrix {
 				    	gx=(a[i+1][j+1]+2*a[i][j+1]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i][j-1]+a[i-1][j-1]);
 				    	gy=(a[i-1][j-1]+2*a[i-1][j]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i+1][j]+a[i+1][j+1]);
 				    	angle=Math.atan2(gy, gx); //degrees from -pi to pi
-				    	
+
 				    	angle_index=(int) (angle/(2*Math.PI/16)); //int from -8 to 8
 				    	angle_index+=8;//int from 0 to 16
 				    	
@@ -538,7 +669,7 @@ public class Matrix {
 				}	    	
 				
 				
-				
+/*				
 				String stack = "";
 				for(int i = 0; i < 5; ++i)
 				{
@@ -546,13 +677,148 @@ public class Matrix {
 				    {
 				    	for(int k=0;k<16;k++)
 				    	{
-				    		stack = stack + " " + this.gradientVector[i][j][k];
+				    		stack = stack + " " + gradientVector[i][j][k];
 				    	}
 					    stack = stack + "\t";
 				    }
 				    stack = stack + "\n";
 				}
 				System.out.println(stack);
+*/				
+				for(int i = 0; i < 5; ++i)
+				    for(int j = 0; j < 5; ++j)
+				    	for(int k=0;k<16;k++)
+				    		feature_vector[i*5*16+j*16+k] = gradientVector[i][j][k];
+				    	
+
+				return feature_vector;
+				
+	}
+
+	
+	public static Vector<int[]> ProjectionHistograms() {
+		// Horizontal Histogram
+		int[] m_HorizontalFeatureVector = new int[rows];
+		int[] m_VerticalFeatureVector = new int[columns];
+		for (int i = 0; i < rows; i++) {
+			int count = 0;
+			for (int j = 0; j < columns; j++) {
+				if (a[i][j] == 0) {
+					count++;
+				}
+
+			}
+			m_HorizontalFeatureVector[i] = count;
+		}
+		// Vertical Histogram
+		for (int j = 0; j < columns; j++) {
+			int count = 0;
+			for (int i = 0; i < rows; i++) {
+				if (a[i][j] == 0) {
+					count++;
+				}
+
+			}
+			m_VerticalFeatureVector[j] = count;
+		}
+
+		Vector<int[]> objNewVector = new Vector<int[]>();
+		objNewVector.add(m_HorizontalFeatureVector);
+		objNewVector.add(m_VerticalFeatureVector);
+		return objNewVector;
+	}	
+	
+	public static Vector<int[]> CrossingFeatureExtraction() {
+		int[] m_HorizontalFeatureVector = new int[rows];
+		int[] m_VerticalFeatureVector = new int[columns];
+		for (int i = 0; i < rows; i++) {
+			int count = 0;
+			for (int j = 0; j < columns; j++) {
+				if (j != 0) {
+					if (a[i][j - 1] == 1 && a[i][j] == 0) {
+						count++;
+					}
+				}
+			}
+			m_HorizontalFeatureVector[i] = count;
+		}
+
+		for (int j = 0; j < columns; j++) {
+			int count = 0;
+			for (int i = 0; i < rows; i++) {
+				if (i != 0) {
+					if (a[i - 1][j] == 1 && a[i][j] == 0) {
+						count++;
+					}
+				}
+
+			}
+			m_VerticalFeatureVector[j] = count;
+		}
+
+		Vector<int[]> objNewVector = new Vector<int[]>();
+		objNewVector.add(m_HorizontalFeatureVector);
+		objNewVector.add(m_VerticalFeatureVector);
+		return objNewVector;
+	}
+	
+	public static Vector<int[]> DistancesFeatureExtraction() {
+		int[] leftList = new int[rows];
+		for (int i = 0; i < rows; i++) {
+
+			for (int j = 0; j < columns; j++) {
+				if (a[i][j] == 0) {
+					leftList[i] = j;
+					break;
+
+				}
+			}
+
+		}
+
+		int[] upList = new int[columns];
+
+		for (int j = 0; j < columns; j++) {
+
+			for (int i = 0; i < rows; i++) {
+				if (a[i][j] == 0) {
+					upList[j] = i;
+					break;
+
+				}
+			}
+
+		}
+
+		int[] rightList = new int[rows];
+		for (int i = 0; i < rows; i++) {
+			for (int j = columns - 1; j >= 0; j--) {
+				if (a[i][j] == 0) {
+					rightList[i] = j;
+					break;
+
+				}
+			}
+
+		}
+
+		int[] downList = new int[columns];
+		for (int j = 0; j < columns; j++) {
+			for (int i = rows - 1; i >= 0; i--) {
+				if (a[i][j] == 0) {
+					downList[j] = i;
+					break;
+
+				}
+			}
+
+		}
+		Vector<int[]> objNewVector = new Vector<int[]>();
+		objNewVector.add(leftList);
+		objNewVector.add(upList);
+		objNewVector.add(rightList);
+		objNewVector.add(downList);
+		return objNewVector;
 	}
 
 }
